@@ -1,0 +1,61 @@
+\newpage
+\section{Ajoutez un dépôt.. ..dans votre dépôt}
+
+%Pour faire cela, nous avons deux méthodes :
+%\begin{description}
+%\item[- git submodule : ] Va créer un nouveau dépôt git, dans un dossier donné, mais stocke sont propre .git dans le .git du dépôt parent (dans .git/modules). Les différents sous-dépôts seront référencés dans un fichier .gitmodules situé à la racine du dépôt parent. Pour manipuler ce sous dépôt il suffit de s'y rendre et d'utiliser les commandes git (/Tortoise Git) habituelles\\
+%\item[- git subtree : ] Méthode la plus élégante et rétro-compatible, mais pas vraiment user-friendly. Pour manipuler tout ça, il faudra passer par de nouvelles commandes.. ..qui ne sont pas intégrées à Tortoise Git. C'est pour cela que je n'en parlerai pas dans ce tutoriel.\\
+%\end{description}
+%
+%Pour en savoir plus sur git subtree et les différences entre ces méthodes, je vous conseille d'aller ici :
+%\begin{itemize}
+%\item Le man de git-subtree
+%\item Alternatives To Git Submodule: Git Subtree 
+%\end{itemize}
+
+Pour cela nous allons créer un sous-dépôt, un 'submodule'.\\
+Un sous-dépôt est un dépôt dont le .git se trouve dans le .git du parent dans le dossier modules, pour être précis.\\
+La racine du sous-dépôt doit être l'un des dossiers du dépôt parent. Les différents sous-dépôts étant référencés dans un fichier .gitmodules se situant à la racine du dossier parent.\\
+
+Voici un schéma de l'arborescence que l'on peut avoir :\\
+
+\dirtree{%
+ .1 /.
+ .2 CheminVers/.
+ .3 MonProjetGit/\\.
+ .4 UnDossier1/.
+ .4 UnFichier2.
+ .4 UnAutreFichier3\\.
+ .4 UnAutreDossier4/.
+ .5 UnFichier5.
+ .5 MonSousDepotGit/.
+ .6 .git.
+ .6 UnFichier6\\.
+ .4 .gitmodules\\.
+ .4 .git/.
+ .5 modules.
+ .6 UnAutreDossier4/.
+ .7 MonSousDepotGit/.
+ .8 (équivalent du .git du sous dépot)\\.
+ .5 (d'autres choses)\\.
+}
+
+Ici, Le dossier /CheminVers/MonProjetGit/UnAutreDossier4/MonSousDepotGit est le sous-dépôt du dépôt /CheminVers/MonProjetGit/\\
+
+Dans le .git du dépôt parent se trouve le ".git" du sous-dépôt dans de multiples sous-dossiers vide, en : \\
+/CheminVers/MonProjetGit/.git/modules/UnAutreDossier4/MonSousDepotGit/\\
+
+Dans le sous dépot, le .git est un fichier contenant un chemin relatif vers le dossier "MonSousDepotGit" qui se trouve dans le dépôt parent. Ici, il ressemblera à :
+\begin{verbatim}
+gitdir: ../../.git/modules/UnAutreDossier4/MonSousDepotGit/
+\end{verbatim}
+\newpage
+Dans la racine du dépôt parent se situe un fichier .gitmodules qui liste les sous-dépôts et leur remotes. Ici, il ressemblera à :
+\begin{verbatimtab}[4]
+[submodule "UnAutreDossier4/MonSousDepotGit"]
+	path = UnAutreDossier4/MonSousDepotGit
+	url = http://monserveur.fr/MonSousDepot.git
+\end{verbatimtab}
+
+
+Une fois crée il est possible de le manipuler comme un dépôt normal en s'y positionnant (cd/clic droit sur le dossier en question) 

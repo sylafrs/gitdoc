@@ -1,0 +1,84 @@
+\newpage
+\section{Sauvegarder temporairement avec stash}
+
+stash permet de sauvegarder l'état de l'index et des fichiers dans une pile (une liste de "stashes". Lorsque l'on y met un stash, il rentre en première position, lorsque l'on sort un stash, on retire celui en première position et on va avancer les autres) \\
+
+Il y a plusieurs commandes principales (accessibles avec Tortoise Git) :
+\begin{description}
+\item[- Stash show/list : ]montre l'état de la pile
+\item[- Stash save : ]sauve l'état courant des dossiers et de l'index et pousser ces objets dans la pile.\\
+L'état des dossiers et de l'index sera remis tel qu'il était dans le commit
+\item[- Stash pop : ]fusionne l'état courant des dossiers et de l'index avec celui sauvé et enleve ces objets de la pile.
+\item[- Stash apply : ]fusionne comme avec pop mais ne retire rien de la pile
+\item[- Stash drop : ]retire de la pile sans fusionner (perd les changements)
+\item[- Stash clear : ]drop tout.\\ 
+\end{description}
+
+Afin de mieux comprendre comment utiliser ces commandes, nous allons prendre un petit exemple.
+
+\newpage
+\subsection{Application : le quickfix}
+Imaginons que nous ayons un commit "SUR", que nous sommes en train de travailler sur le projet, et que le travail en cours est rempli de problèmes.\\
+Tout-à-coup quelqu'un nous demande de fixer un problème du commit "SUR". Comment faire ?
+\subsubsection{Vieille école : la création d'une branche temporaire}
+Vous ne connaissiez pas stash et vous décidez donc de sauver votre travail en cours dans une nouvelle branche "unstable".\\
+Vous allez donc y faire votre commit "en cours" (oui, du coup, c'est pas un BON commit) et allez retourner sur le commit "SUR", y faire votre fix, puis commiter le changement pour finalement retourner travailler sur votre branche, après y avoir fusionner le fix.\\
+
+En somme, vous auriez fait ça :\\
+\begin{verbatim} 
+ SUR   ENCOURS   FIX    MERGE
+- * ----- * ------------- * -
+  |    (pwerk)            |
+  --------------- * -------
+               master  unstable
+               
+Plus tard :
+
+ SUR   ENCOURS   FIX    MERGE  FEATURE
+- * ----- * ------------- * ----- * -
+  |                       |     master
+  --------------- * -------
+                 
+\end{verbatim}
+
+Résultat : vous avez deux commits buggés, où du travail est en cours de rédaction et dans lequel l'application pourrait poser problème. Ensuite, le travail effectif de FEATURE se situe sur trois commits distincts : entre SUR et ENCOURS, entre ENCOURS et MERGE (normalement, rien n'y est fait là) et enfin entre MERGE et FEATURE.\\
+
+Autrement dit, si on souhaite localiser un problème cela promet d'être compliqué, et on risque de prendre nos deux commits pour des versions sures..
+\newpage
+\subsubsection{Nouvelle méthode : stash}
+
+Avec stash, vous commencez par sauver vos changements en faisant stash save.\\
+Vos changements sont retirés et vous êtes directement sous SUR, vous allez donc directement corriger votre problème. Une fois le fix terminé, vous le commitez puis pour continuer à travailler, vous allez faire un stash pop : Votre fix se fusionnera avec votre précédent stash, et vous pourrez terminer tranquillement votre travail.\\
+
+Du côté de notre arbre, cela donne :
+\begin{verbatim}
+ SUR     FIX
+- * ----- * -
+        master
+        
+Plus tard :
+
+ SUR     FIX   FEATURE
+- * ----- * ----- * -      
+                master
+      
+\end{verbatim}   
+
+Dans cet arbre, les trois commits sont bons, on peut partir de SUR, FIX et FEATURE sans soucis. Les changements liées à la feature sont dans le commit FEATURE, le fix est bien dans FIX et rien n'est séparé.\\
+
+Schématiquement, cela revient presque au même, en plus simple rapide et efficace :       
+\begin{verbatim}
+SUR --> TRAVAIL --> SUR --> FIX --> TRAVAIL+FIX --> FEATURE 
+                 |               |
+                 ---- TRAVAIL ----
+                 
+   edits       stash   edits    stash          edits
+               (save) (commit)  (pop)         (commit)
+\end{verbatim}
+
+\subsection{Conflit lors du stash pop}
+
+En cas de conflit, le pop est considéré raté et si l'outil de fusion a fait son travail,
+le stash est toujours dans la pile. Une fois le conflit résolu vous devrez donc faire un stash drop (le retirer à la main)\\
+
+\textbf{Attention : } Si vous refaites un stash pop, git tentera de fusionner la version fraîchement fusionnée avec l'ancien travail sauvé, ce qui fabriquera, dans ce cas, forcément un conflit, qui plus est : inutile !

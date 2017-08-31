@@ -1,0 +1,148 @@
+\newpage
+\section{Sélectionner un commit à partir d'un autre}
+\subsection{Identifier un commit précis}
+
+Comme je vous l'avais dit, il y a plusieurs moyens de se déplacer : \\
+
+Par exemple :\\
+\begin{itemize}
+\item En écrivant le SHA-1 d'un commit
+\item En écrivant le nom d'une branche
+\item En écrivant le nom d'un tag\\
+\end{itemize}
+
+Mais ce n'est pas tout !\\
+
+On peut aussi :
+\begin{itemize}
+\item Se déplacer dans un commit à partir d'un autre commit
+\item Se déplacer dans un commit en fonction de l'historique (n-ième opération, ou temps)
+\end{itemize}
+
+\subsubsection{Se déplacer à partir d'un commit}
+
+Nous avons là deux symboles : \textasciicircum et \textasciitilde\\
+HEAD\textasciicircum1 et HEAD\textasciitilde1 signifient la même chose : le commit précédent.\\
+
+Avec un chiffre supérieur à 1, la différence se voit :
+\begin{itemize}
+\item HEAD\textasciicircum2 signifie : aller au second parent de HEAD (commit de merge)
+\item HEAD\textasciitilde2 signifie : aller au (premier) parent du (premier) parent de HEAD\\
+\end{itemize}
+
+Ainsi, master\textasciitilde2 et master\textasciicircum\textasciicircum sont équivalents.\\
+On peut aussi bien écrire : master\textasciicircum\textasciicircum\textasciitilde3\textasciicircum2 (ce qui revient à master\textasciitilde5\textasciicircum2, pour le coup)\\
+
+\paragraph{Remarque :} Ecrire master\textasciicircum3 serait voué à l'echec.
+
+\newpage
+\subsubsection{Se déplacer à partir de l'historique}
+
+Afin de connaître l'historique des références d'une branche ou de HEAD, on peut utiliser : git reflog.\\
+
+Exemple : 
+\begin{verbatim}
+$ git reflog
+734713b... HEAD@{0}: commit: fixed refs handling, added gc auto, updated
+d921970... HEAD@{1}: merge phedders/rdocs: Merge made by recursive.
+1c002dd... HEAD@{2}: commit: added some blame and merge stuff
+1c36188... HEAD@{3}: rebase -i (squash): updating HEAD
+95df984... HEAD@{4}: commit: # This is a combination of two commits.
+1c36188... HEAD@{5}: rebase -i (squash): updating HEAD
+7e05da5... HEAD@{6}: rebase -i (pick): updating HEAD
+
+# git show montre le commit pointé
+$ git show HEAD@{3}
+
+# Si vous tapez trop loin, ça ne marchera pas.
+\end{verbatim}
+
+Comme vous pouvez le voir : on peut utiliser le symbole @ pour connaître le commit (le sha1 à côté) que pointait la référence au moment donné.
+
+En plus d'utiliser un chiffre pour récupèrer la n-ième opération, on peut aussi bien utiliser une date :
+
+\begin{verbatim}
+$ git show HEAD@{yesterday}
+$ git show HEAD@{2.months.ago}
+$ git show master@{1 month 2 weeks 3 days 1 hour 1 second ago}
+$ git show mybirth@{1992-09-29 23:00:00}
+
+# Si vous tapez trop loin, ça ne marchera pas.
+\end{verbatim}
+
+\newpage
+\subsection{Identifier un ensemble de commits}
+\subsubsection*{Les deux points : ..}
+Les deux points représentent la portée entre deux commits, par exemple :
+branche1..branche2 représente tous les commits qui sont référencés dans branche2 mais pas dans branche1
+
+Exemple :
+\begin{verbatim}
+A     B     C     D     E     F     G
+* --- * --- * --- * --------- *
+            |               master
+            ----------- * --------- *
+                                   test
+                                   
+$ git log master..test
+G
+E
+
+$ git log test..master
+F
+D
+\end{verbatim}
+
+\subsubsection*{--not et \textasciicircum}
+Certes le symbole .. est utile, mais parfois, on a besoin d'utiliser plus de deux branches.\\
+Pour cela on peut utiliser le --not (ou \textasciicircum).
+
+Exemple :
+\begin{verbatim}
+# Equivalents :
+$ git log master..test
+$ git log ^master test
+$ git log test --not master
+
+# Equivalents :
+$ git log master test --not origin/master
+$ git log master test ^origin/master
+
+\end{verbatim}
+
+\newpage
+\subsubsection*{Les trois points : ...}
+
+Les trois points représentent tous les commits entre deux références sauf ceux qui sont accessible à partir des deux références.\\
+
+Exemple :
+\begin{verbatim}
+A     B     C     D     E     F     G
+* --- * --- * --- * --------- *
+            |               master
+            ----------- * --------- *
+                                   test
+                                   
+$ git log master...test
+D
+E
+F
+G
+
+$ git log test...master
+D
+E
+F
+G
+
+$ git log --left-right test...master
+> D
+< E
+> F
+< G
+\end{verbatim}
+
+\subsubsection{La portée chez Tortoise Git}
+
+En maintenant Ctrl appuyé, dans le log, il est possible de selectionner plusieurs commits.\\
+Dans le cas où on en selectionne deux, tortoise git nous propose un sous-log des commits en fonction de .. ou de ... !

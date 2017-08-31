@@ -1,0 +1,343 @@
+\newpage
+\section{Un système de branches}
+
+Puisque nous pouvons travailler en parallèle où bien vouloir modifier un fichier à partir d'une version plus récente :
+git utilise ce que l'on appelle des branches.\\
+
+\subsection{Commits, branches et HEAD}
+
+Par défaut, nous avons 3 choses :
+\begin{verbatim}
+A     B     C
+* --- * --- *
+        HEAD=master
+\end{verbatim}
+
+\begin{description}
+\item[- Les commits : ] sont représentés par les * : A, B et C.\\
+Ils ont chacun un identifiant SHA-1.\\
+\item[- Les branches : ] ici, il n'y a que master.\\
+Une branche fait parti de ce que l'on appelle une référence, dans git. Elles sont représentées par un fichier qui se situe dans .git/refs/heads et qui contient le SHA-1 du commit où elles se trouvent.\\
+\item[- HEAD : ] Il s'agit de l'endroit sur lequel on est.\\
+Unique, HEAD fait aussi parti de ce que l'on appelle une référence, mais celle-ci est particulière étant donné qu'elle peut à la fois pointer sur un commit, mais aussi sur une autre référence (ex: une branche).\\
+Il est représenté par le fichier /.git/HEAD.\\
+\end{description}
+
+\textbf{Attention : }Si HEAD se trouve sur le même commit qu'une branche, cela ne veut pas dire que HEAD pointe forcément sur une branche !\\
+
+Dans mes schémas, si HEAD ne pointe pas sur un commit mais sur une branche, j'utiliserai le symbole =. Dans le schéma ci-dessus : HEAD pointe sur master.
+\newpage
+Sur Tortoise Git, HEAD est représenté par le gras.
+Si HEAD se trouve sur une branche, le nom de la branche en question est mis en rouge.\\
+
+Lorsque l'on crée un commit, il est crée à partir du commit où se trouve HEAD, et il peut se passer deux choses :\\
+\begin{itemize}
+\item si HEAD pointe sur un commit : HEAD pointe sur le nouveau commit
+\item si HEAD pointe sur une branche : la branche pointe sur le nouveau commit, HEAD pointe toujours sur la branche (la branche grandit)\\
+\end{itemize}
+
+\begin{verbatim}
+A     B     C                A     B     C     D
+* --- * --- *       ====>    * --- * --- *
+    HEAD  master                   |   master
+                                   ----------- *
+                                              HEAD
+          
+A     B     C                A     B     C     D
+* --- * --- *       ====>    * --- * --- * --- *
+           HEAD                        master HEAD
+          master                          
+          
+          
+A     B     C                A     B     C     D
+* --- * --- *       ====>    * --- * --- * --- *
+        HEAD=master                        HEAD=master
+        
+\end{verbatim}
+
+Dans le cas où l'on sort d'une branche non référencée, nous risquons de perdre tout les commits qu'elle apportait.
+Pour éviter que cela n'arrive, nous allons commencer par apprendre à créer une nouvelle branche.
+
+\begin{verbatim}
+A     B     C     D            A     B     C     D
+* --- * --- *                  * --- * --- *
+      |   master       ====>         | HEAD=master
+      ----------- *                  ----------- *
+                 HEAD                         (perdu)
+\end{verbatim}
+\newpage
+\subsection{Créer une branche}
+\subsubsection{Par ligne de commande}
+
+Par défaut, la branche que vous créerez se situera à l'endroit où se trouve HEAD.
+Il y a deux méthodes pour créer une branche :
+
+\begin{verbatim}
+# Créer une branche et y faire pointer HEAD
+$ git checkout -b <nom_branche>
+
+# Créer une branche sans y faire pointer HEAD
+$ git branch <nom_branche>
+\end{verbatim}
+
+\subsubsection{Par Tortoise Git}
+\begin{itemize}
+\item Clic droit $\rightarrow$ Tortoise Git $\rightarrow$ Create branch
+\item Log $\rightarrow$ Clic droit sur une version $\rightarrow$ Create branch at this version
+\item Lors d'un commit : case "New branch", la branche sera crée et HEAD pointera dessus avant que le commit ne se crée
+\end{itemize}
+
+\subsubsection{Résultat}
+\begin{verbatim}
+A     B     C                A     B     C     D
+* --- * --- *       ====>    * --- * --- *
+    HEAD  master                   |   master
+                                   ----------- *
+                                              HEAD                                              
+
+                    ====>    A     B     C     D
+                             * --- * --- *
+                                   |   master
+                                   ----------- *
+                                         HEAD=maBranche
+\end{verbatim}
+
+\newpage
+\subsection{Déplacer HEAD}
+
+Il y a plusieurs méthodes pour faire déplacer HEAD :\\
+
+\begin{verbatim}
+# Déplace HEAD proprement, mélange les modifications en cours avec  
+# celles induites par le déplacement dans les versions.
+# Empêche le déplacement en cas de conflits dans le mélange des modifications.
+$ git checkout <ref>
+
+# Déplace HEAD en SUPPRIMANT toutes les modifications en cours.
+$ git reset --hard <ref>
+
+# Déplace HEAD mais conserve les fichiers du précédent commit et les indexe
+# Les modifications en cours seront la différence entre le commit cible 
+# et le commit précédent en plus des modifications qu'il y avait
+$ git reset --mixed <ref>
+
+# Déplace HEAD mais conserve les fichiers du précédent commit et ne les indexe pas
+# Cela revient à modifier /.git/HEAD
+$ git reset --soft <ref>
+\end{verbatim}
+
+Il est possible de faire l'ensemble de ces opérations avec tortoise git à partir du log : Faites un clic droit sur la branche ou le commit qui vous intéresse et choisissez Checkout ou Reset. Si vous choisissez reset, vous aurez le choix entre les trois modes.
+
+\newpage
+
+\subsection{Fusionner la branche courante}
+
+Bien évidemment, si on ne pouvait pas stocker les changements quelle apporte dans la branche principale, la création d'une nouvelle branche ne servirait à rien.
+Nous allons donc apprendre à mettre à jour une branche en la fusionnant avec HEAD.
+
+Pour pouvoir fusionner deux branches il faut, pour commencer, que la branche à fusionner apporte des changements à la branche courante.\\
+
+Par exemple :
+\begin{verbatim}
+A       B       C
+* ----- * ----- *
+      aMerger 
+            HEAD=master
+\end{verbatim}
+
+Il est absolument inutile dans ce cas de fusionner aMerger dans master !
+master contient déjà toutes les modifications de aMerger.
+\newpage
+\begin{verbatim}
+A       B       C               A       B       C
+* ----- * ----- *               * ----- * ----- *
+   HEAD=master          ====>               HEAD=master
+              aMerger                         aMerger
+\end{verbatim}
+
+Là, par contre, bien que master n'apporterait rien à aMerger, ici,
+aMerger contient des modifications que master n'a pas. Fusionner master et aMerger permettrait de mettre à jour master.
+
+\begin{verbatim}
+A     B     C     D             A        B        C        D         M
+* --- * --- *     *             * ------ * ------ * ---------------- *      
+      | HEAD=master     ====>            |                           |
+      ----------- *                      ----------------- * ---------
+                aMerger                                 aMerger  HEAD=master
+                                                      (fusionnée)
+\end{verbatim}
+
+Ici, les deux branches ont eu des changements parallèles : une véritable fusion entre les fichiers à lieu, ce qui crée un commit de fusion.
+Git est assez puissant et arrive facilement à faire la part des choses, cependant parfois les mêmes endroits des mêmes fichiers sont modifiés, on appelle ça un conflit : il faut, dans ce cas, le résoudre à la main. On en parlera plus tard. \\
+
+Donc maintenant, comment fusionner les branches ?
+\subsubsection{En lignes de commande}
+\begin{verbatim}
+# Faites attention que vous n'ayez rien à commiter !
+$ git status
+
+# D'abord on se place sur la branche que l'on veut
+$ git checkout aMettreAJour
+
+# Puis on fusionne !
+$ git merge aMerger
+
+# Résultat
+$ git log --oneline --color --graph
+\end{verbatim}
+
+\subsubsection{Par Tortoise git}
+Vous devriez être déjà plus familier avec l'interface.
+Le bouton à appuyer s'appelle "Merge".
+Il faut tout d'abord veiller à bien être sur la branche qui recevra la fusion.
+On peut trouver le bouton et dans le log et dans le menu clic-droit.
+\newpage
+\subsection{Résoudre les conflits}
+
+Arg, votre fusion ne s'est pas faite toute seule et git vous supplie de l'aider ?
+Pas de soucis, on va les résoudre ces conflits !!
+
+Lorsque git ne sait pas quoi faire, il va écrire localement tous les confits dans le fichier
+
+Par exemple :
+Ecrivons dans notre fichier toto :
+\begin{verbatim}
+A
+B
+C
+D
+E
+\end{verbatim}
+
+Créons un commit, et retournons au commit précédent\\
+
+\textbf{Astuce} Pour la ligne de commande : HEAD$^{\bigwedge}$1 indique : "un commit avant HEAD"\\
+
+Créons une nouvelle branche "troll" écrivons dans le fichier toto :
+\begin{verbatim}
+A
+bbbbb
+C
+ddddd
+E
+\end{verbatim}
+
+Créons un commit, nous devrions avoir un graph qui ressemble à ça :
+
+\begin{verbatim}
+                     A      B      C
+anciens commits ---- * ---- *
+                     |    master
+                     ------------- *
+                               HEAD=troll
+\end{verbatim}
+
+Maintenant, retournons (HEAD) sur master et fusionnons troll à HEAD(=master).
+
+La fusion se place pas comme prévue (enfin..) et git vous indique qu'il a besoin d'aide.
+A ce moment précis, toutes les modifications apportées par troll sont indexées, et les fichiers non fusionnés sont notés comme "conflictueux"
+\newpage
+Git, pour vous aider, à écrit dans toto de cette manière :
+\begin{verbatim}
+A
+<<<<<<< HEAD
+B
+C                                <-- Partie telle qu'elle est dans HEAD
+D
+=======
+bbbbb
+C                                <-- Partie telle qu'elle est dans troll
+ddddd
+>>>>>>> troll
+E
+\end{verbatim}
+
+Pour résoudre le conflit vous devez alors supprimer les annotations supplémentaires et fusionner la partie problématique.
+Pour indiquer à git que le conflit est résolu il suffit d'indexer le fichier (git add) ou de le supprimer (git rm) et pour finir la fusion, il faut créer le commit de fusion (il est impossible de faire de commit s'il reste des fichiers conflictueux)
+
+\subsubsection{En ligne de commande}
+
+Vous pouvez faire revenir un fichier selon l'une ou l'autre branche à l'aide de checkout :
+\begin{verbatim}
+# Marque toto.txt comme résolu :
+$ git add toto.txt
+
+# Résout le conflit en prenant le fichier de HEAD(=master)
+$ git checkout --ours toto.txt
+
+# Résout le conflit en prenant le fichier de la branche à fusionner (troll)
+$ git checkout --theirs toto.txt
+\end{verbatim}
+
+\subsubsection{Sous tortoise git}
+
+Tout comme en ligne de commande, sous Tortoise Git, il y a des outils facilitant la résolution des conflits. Des outils de feignants certes, mais bien utiles.\\
+Après la tentative de fusion, git vous propose de "Résoudre" les conflits, si vous acceptez : la fenêtre de commit normale apparait (sinon il suffit de cliquer sur "Commit")\\
+
+Ici, Tortoise git propose trois choses (clic droit sur les fichier à conflit) :
+\begin{itemize}
+\item Résoudre le conflit (il faut faire les modifications à la main avant)
+\item Résoudre le conflit en prenant la version locale (celle de HEAD)
+\item Résoudre le conflit en prenant la version distante (celle de troll)\\
+\end{itemize}
+
+Bien sûr il reste aussi possible de le supprimer.
+\newpage
+\subsection{Supprimer une branche}
+
+Pour commencer : on ne peut pas supprimer une branche si HEAD est dessus, ensuite, pour supprimer une branche \textbf{sans forcer}, elle doit être fusionnée, par exemple :
+\begin{verbatim}
+__________________________________________________
+
+ A        B        C        D         M
+ * ------ * ------ * ---------------- *      
+          |                           |            
+          ----------------- * ---------
+                         aMerger  HEAD=master
+                       (fusionnée)
+                       
+> Aucun risque de supprimer aMerger
+__________________________________________________
+                       
+ A        B        C        D        
+ * ------ * ------ *      
+          |    HEAD=master                         
+          |                                        
+          ----------------- *                      
+                         branche1 (fusionnée à branche2)
+                         branche2 (fusionnée à branche1)
+
+> Aucun risque de supprimer branche1 ou branche2
+__________________________________________________
+
+ A        B        C        D        
+ * ------ * ------ *      
+          |    HEAD=master                         
+          |                                        
+          ----------------- *                      
+                         branche1
+
+> Supprimer branche1 risque de perdre D .       
+\end{verbatim}
+(Un commit perdu n'est pas tout de suite supprimé : il restera accessible avec son SHA-1 quelques temps. (cf : git prune))\\
+
+Si la branche n'est pas fusionnée, il va falloir forcer, à ce moment là, on peut supprimer la branche "aMerger" sans aucun problème, et sans perdre quoi que ce soit.
+\newpage
+\subsubsection{En ligne de commande}
+\begin{verbatim}
+# On s'assure de ne pas être sur aMerger
+$ git checkout master
+
+# On la supprime (si fusionnée)
+$ git branch -d aMerger
+
+# On la supprime (en forcant)
+$ git branch -D aMerger
+\end{verbatim}
+
+Par sécurité, il est conseillé de ne jamais forcer (sauf si vous vous fichez de perdre le travail qui n'a pas été fusionné).
+
+\subsubsection{Avec tortoise git}
+Sur la version de Tortoise git que j'ai actuellement : on est obligé d'ouvrir le log pour supprimer une branche (clique-droit sur une branche (en vert))\\
+
+\textbf{Attention} : Cela forcera la suppression automatiquement, alors soyez vigilants !

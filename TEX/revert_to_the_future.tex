@@ -1,0 +1,56 @@
+\newpage
+\section{Retournons vers le futur}
+\subsection{Reprendre la version d'un ou plusieurs fichiers précis}
+
+Car oui, il est possible \textbf{sans tricher\footnote{Tricher : Se prendre la tête en se déplaçant dans les commits et des copiés collés}} de faire revenir juste un fichier en arrière, et ce, grâce à checkout !
+
+\begin{verbatim}
+# Remet fichier tel qu'il est dans <id> (ex : master, SHA-1, HEAD, tag)
+$ git checkout <id> /chemin/fichier
+
+# Remet fichier tel qu'il est dans le commit dans lequel HEAD est.
+$ git checkout -- /chemin/fichier
+\end{verbatim}
+
+-- permet de séparer les $<$id$>$ des fichiers. Dans le cas où une branche s'appelle fichier.txt (oui, je sais), cela permet de retirer l'ambiguïté\\
+
+Avec Tortoise git, on appelle ça : faire un Revert.
+
+\begin{itemize}
+\item Clic-droit sur un fichier de Working dir changes : annule les modifications courantes d'un fichier
+\item Clic-droit sur un fichier d'un commit : fait revenir un fichier tel qu'il était dans le commit en question.
+\end{itemize}
+
+\subsection{Annuler un ou plusieurs commits}
+Une autre commande peut-être utilisée si l'on veut prendre tous les fichiers à la fois : revert. Tortoise Git permet de le faire en faisant un clic doit sur le(s) commit(s) en question.
+
+\begin{verbatim}
+# Annule les changements du commit <id> et crée un commit.
+$ git revert <id>
+
+# Annule les changements du commit <id> sans créer de commit
+# il faudra le faire nous même.
+$ git revert -n <id>
+$ git commit -m "Revert"
+\end{verbatim}
+
+\paragraph{Attention : } Revert ne fonctionne qu'avec des commits et se termine en créeant un commit !
+
+\newpage
+\subsection{Annuler les modifications en cours}
+
+Il y a plusieurs méthodes pour faire ça : checkout et reset :
+(l'option hard permet d'appliquer l'annulation sur les fichiers en plus de HEAD)
+
+\begin{verbatim}
+$ git reset --hard HEAD
+$ git checkout -- .
+\end{verbatim}
+
+\subsubsection{Annuler un commit non partagé}
+Utilisé sur un commit (et non sur HEAD), cela permet de supprimer le commit de l'arbre.
+Si le commit a été déjà partagé, cela ne servira à rien et risque de poser des problèmes, dans ce cas il faudra utiliser revert (mais il apparaîtra toujours dans l'arbre).\\
+
+Vous connaissez maintenant les différences de comportement entre checkout, revert et reset.
+
+

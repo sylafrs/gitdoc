@@ -1,0 +1,169 @@
+\newpage
+\section{Un dépôt en ligne}
+L'un des grands avantages d'utiliser git, en plus de pouvoir gérer facilement les versions hors-ligne (ce qui le démarque de \acl{svn}), c'est aussi la possibilité de synchroniser ses branches sur un serveur en ligne rendant ainsi possible la mise en commun des différentes versions\\
+
+Lorsque l'on lie notre dépôt à un dépôt distant, on peut :
+\begin{description}
+\item[- fetch :]Recevoir les branches en ligne (et les commits de différence)
+\item[- push :] Créer/Fusionner (commit de fusion interdit) une de nos branches, dans le serveur
+\end{description}
+
+Commençons par lier notre dépôt à un dépôt en ligne.
+
+\subsection{Lier un dépôt local à un dépôt serveur}
+\subsubsection{Par ligne de commande}
+\begin{verbatim}
+$ git remote add <nom identifiant du dépôt> <adresse du dépôt>
+
+# Par défaut on appelle le premier identifiant "origin"
+
+# Exemple pour github, par ssh :
+$ git remote add origin git@github.com:nomUtilisateur/nomDepot.git
+
+# Exemple pour github, par https :
+$ git remote add origin https://github.com/nomUtilisateur/nomDepot.git
+\end{verbatim}
+
+\subsubsection{Par Tortoise git}
+Clic droit $\rightarrow$ Tortoise git $\rightarrow$ Settings $\rightarrow$ Git $\rightarrow$ Remote\\
+
+Ici, on renseigne les champs "Remote" et "URL", avant d'appuyer "Add New/Save" puis "Ok"\\
+
+Par exemple : "origin" et "git@github.com:nomUtilisateur/nomDepot.git" pour github
+
+\newpage
+\subsection{Créer un clone d'un dépôt en ligne}
+
+Créer un clone d'un dépôt permet d'obtenir un dépôt local identique au dépôt en ligne, directement lié avec le dépôt en ligne. (l'identifiant sera "origin").
+
+\subsubsection{Par ligne de commande}
+\begin{verbatim}
+$ git clone <adresse du dépot> [nom du dossier (optionnel)]
+
+# Exemple pour github, par ssh :
+$ git clone git@github.com:nomUtilisateur/nomDepot.git
+
+# un dossier "nomDepot" sera crée
+
+# Exemple pour github, par ssh :
+$ git clone git@github.com:nomUtilisateur/nomDepot.git nomDossier
+
+# un dossier "nomDossier" sera crée
+\end{verbatim}
+
+\subsubsection{Tortoise git}
+Clic droit en dehors d'un quelconque dépôt, puis Clone.
+On remplit l'url, et c'est parti !
+
+\subsection{Récupèrer les différences avec le serveur}
+Pour récupèrer les modifications qui se sont faites en ligne, il suffit de faire un "fetch"
+(git fetch).
+
+Si des commits existent en ligne mais pas en local, ils seront téléchargés.
+
+Exemple :
+\begin{verbatim}
+
+          A     B     C
+local :   * --- * --- *     
+                  HEAD=master
+
+ORIGIN    A     B     C     D
+remote :  * --- * --- * --- *
+                        HEAD=master
+   
+<<FETCH ORIGIN>>
+
+          A        B        C        D         
+local :   * ------ * ------ * ------ *
+                        HEAD=master
+                          origin/HEAD=origin/master
+\end{verbatim}
+
+Pour mettre à jour master, il suffit de faire un merge de origin/master !\\
+
+Faire les deux opérations à la suite, c'est faire faire un pull (git pull)
+
+\subsection{Fusionner une branche distante}
+Pour mettre à jour le serveur, faire un Push, il faut au préalable que notre branche soit déjà fusionnée avec la branche à fusionner.. concrètement :
+\begin{verbatim}
+A     B     C
+* --- * --- *             <-- Déjà à jour.
+          master
+       origin/master
+
+A     B     C
+* --- * --- *             <-- Possible
+          master   
+  origin/master
+  
+A     B     C
+* --- * --- *             <-- Pas possible (inutile)
+          origin/master   
+    master
+           
+A     B     C     D
+* --- * --- *             <-- Pas Possible (non fusionnée : conflit possible)
+      |   master  
+      ----------- *     
+            origin/master
+\end{verbatim}
+
+\subsection{Astuce : Le protocole habituel}
+Habituellement, lorsque l'on veut envoyer notre version en ligne, on fait, ces opérations dans l'ordre :
+
+\begin{enumerate}
+\item ADD : On indexe les modifications et on met en cache les nouveaux fichiers
+\item COMMIT : On crée un commit, une version
+\item FETCH : On récupère la version en ligne
+\item MERGE : On fusionne la version en ligne avec la version locale
+\item PUSH : On envoie la nouvelle version locale en ligne\\
+\end{enumerate}
+
+Puisque un commit peut faire un "add" et que le fetch et merge se font avec la commande "pull", on peut résumer le protocole à :\\
+
+\begin{enumerate}
+\item COMMIT EN INDEXANT (commit -a / les cases de tortoise)
+\item PULL (FETCH + MERGE)
+\item PUSH
+\end{enumerate}
+\newpage
+\subsection*{Lignes de commande}
+\begin{verbatim}
+# récupèrer pour toutes les remotes
+$ git fetch 
+
+# récupèrer que pour origin
+$ git fetch origin
+
+# récupèrer pour toutes les remotes et merger toutes les branches
+$ git pull
+
+# récupèrer que pour origin et merger toutes les branches
+$ git pull origin
+
+# récupèrer que pour origin et ne merger que master
+$ git pull origin master
+
+# tout envoyer sur toutes les remotes
+$ git push
+
+# tout envoyer sur origin
+$ git push origin
+
+# envoyer master sur origin
+$ git push origin master
+
+# envoyer master en tant que "maBranche" sur origin
+$ git push origin master:maBranche
+\end{verbatim}
+
+\subsection{Supprimer une branche distante}
+\subsubsection{Par ligne de commande}
+On va utiliser l'option --delete de push :
+\begin{verbatim}
+# détruit et la branche locale origin/maBranche et la branche maBranche d'origin
+$ git push origin --delete maBranche
+\end{verbatim}
+\subsubsection{Par tortoise git}
+Dans le log, clic droit sur une remote/branche et supprimer : une popup apparaîtra pour savoir s'il faut ou non supprimer ET la branche locale (remote/branche) ET la branche "branche" sur le dépôt en ligne.

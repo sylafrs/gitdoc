@@ -1,0 +1,90 @@
+\part{Installation et configuration d'un serveur git}
+\chapter{Créer le serveur}
+
+Fini Github ! A Manzalab, nos projets sont confidentiels et il existe des moyens gratuits d'avoir un serveur git privé, si nous avons un ordinateur prêt à endosser le rôle de serveur (cela implique, qu'une fois éteint ou la connexion coupée, le dépôt "en ligne" sera inaccessible).\\
+
+Créer un dépôt serveur git est vraiment tout simple, cependant, la connexion à ce dépôt est un peu plus problèmatique..\\
+Alors pour simplifier les choses, nous allons utiliser une interface simplifiée : Gitstack.
+
+\section{Pour windows : GitStack}
+Gitstack est une interface gérant l'accès aux dépôts via http.\\
+Elle crée les dépôts, et permet à des utilisateurs et groupes à s'y connecter.\\
+
+\subsection{Installer Gitstack}
+
+Commençons par l'installer (sur la machine serveur) en allant sur son \href{http://gitstack.com/}{Site officiel}\\
+
+Durant l'installation, on vous demandera d'installer git. Il est fortement recommandé de l'installer.\\
+
+Une fois installé et lancé, prenez votre navigateur favori et allez à l'adresse : \href{http://localhost/gitstack/}{http://localhost/gitstack/}\\
+Vous y apercevrez le panneau d'administration de Gitstack, ce dont on parlera durant tout le chapitre.
+\newpage
+\subsubsection{Allez-y ! C'est permis !}
+Vous serez en mode trial : une sorte de mode dans lequel vous pourrez tout faire.\\
+La license de GitStack stipule que même la version payante.. est gratuite, et que l'on peut modifier les fichiers chez nous.
+Ainsi, lorsque votre mode trial sera passé, vous pourrez le réinitialisant en supprimant et en recréeant le fichier core se situant dans le dossier /data (GitStack regarde la date de création du fichier.. ..qui ne contient rien)\\
+
+Une petite copie appuyant mes propos :
+\begin{verbatim}
+GitStack
+Copyright (C) 2012 Smart Mobile Software
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+\end{verbatim}
+
+Vous pouvez donc modifier tout fichier en toute légalité, selon l'auteur.
+
+\newpage
+\subsection{Administrer Gitstack}
+
+Gitstack contient en somme deux choses :
+\begin{itemize}
+\item Les dépôts
+\item Les utilisateurs\\
+\end{itemize}
+
+Gitstack nous permet dans son interface, de :
+\begin{itemize}
+\item créer et supprimer des dépôts
+\item modifier les privilèges des groupes et utilisateurs pour un dépôt donné
+\item créer/supprimer des utilisateurs (couple login/mot de passe) 
+\item créer/supprimer des groupes (ensemble d'utilisateurs)
+\end{itemize}
+
+\section{Autres moyens}
+
+Bien sûr, nous n'avons vu là qu'une méthode, et qui ne fonctionne que sous windows, mais nous pouvons également utiliser un serveur ssh (OpenSSH, par exemple), ou notre propre serveur http.\\
+
+Avec OpenSSH, il vous faudra recueillir les clés publiques RSA de vos utilisateurs et les stocker dans les différents fichiers authorizedkeys.\\
+De nombreux tutoriels existent sur internet, je vous laisse les trouver.
+
+\chapter{Un dépôt serveur}
+\section{Créer un dépôt serveur}
+Pour créer un dépôt serveur, nous avons utilisé Gitstack, mais nous pouvons aussi en créer un avec tortoise git ou en ligne de commande.\\
+
+\textbf{Avec tortoise git}, il suffit de faire un clic-droit sur un dossier vide (par convention les noms de ces dossiers se terminent par ".git") et faites "Make it bare". si votre dossier se fini par .git, la case est déjà cochée par défaut.\\
+
+\textbf{En ligne de commande}, allez dans le nouveau dépôt puis tapez :
+\begin{verbatim}
+$ git init --bare
+\end{verbatim} 
+
+\section{Administrer le dépôt}
+Contrairement au dépôt local, le dépôt serveur n'est en fait qu'un .git !\\
+Celui-ci contient presque exactement toutes les mêmes informations que nos dépôts locaux :
+\begin{itemize}
+\item Le fichier config permet de gérer les options de git pour le dépôt
+\item Le fichier description décrit le dépôt
+\item Les autres fichiers sont aussi présents en local, par exemple on retrouve le HEAD du serveur (utile si on s'aperçoit d'une erreur en ligne)
+\end{itemize}

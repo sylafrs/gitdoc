@@ -1,0 +1,29 @@
+\chapter{Notions avancées}
+\section{Empêcher l'indexation avec .gitignore}
+
+.gitignore est un fichier permettant d'empêcher l'indexation de fichiers (git add).\\
+Ils fonctionnent sur le principe suivant : Chaque ligne du fichier contient une expression régulière. Si un fichier à un chemin qui correspond à l'une des expressions régulières d'un .gitignore (chemins relatifs), alors le fichier ne sera pas indexé (s'il ne l'est pas déjà).
+
+Pour retirer un fichier du cache, il suffit d'utiliser git rm :
+\begin{verbatim}
+# Supprime DU CACHE tous les fichiers du dossier.
+$ git rm -rf --cached .
+
+# Ajoute dans le cache tous les fichiers du dossier.
+$ git add .
+
+# Les deux commandes mises côte à côte permet de sortir
+# du cache tout ce qui est dans le .gitignore.
+\end{verbatim}
+
+Sous Tortoise git :\\
+
+Clic-droit sur un fichier $\rightarrow$ Tortoise Git $\rightarrow$ Delete (keep local)
+
+\section[Optimisez votre dépôt avec le Garbage Collector]{Optimisez votre dépôt avec le GC}
+
+git gc et git prune
+
+\section{Comparer deux versions}
+
+git diff et git log

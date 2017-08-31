@@ -1,0 +1,67 @@
+\documentclass[10pt,a4paper]{report}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{verbatim}
+\usepackage{moreverb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{wrapfig}
+\usepackage{graphicx}
+%\usepackage[T1]{fontenc}
+%\usepackage{lmodern}
+\usepackage[footnote]{acronym}
+\usepackage{array}
+\usepackage{dirtree}
+
+% Links
+\definecolor{couleur_liens}{rgb}{0, 0, 0.5}
+
+% Acronyms
+\acrodef{svn}[svn]{Subversion}
+
+% Tables
+\definecolor{table_header_color}{rgb}{1,1,1}%{rgb}{0.85, 0.95, 1}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+% Settings..
+\author{LAFON Sylvain pour Manzalab}
+\title{Utilisation du gestionnaire de version :\\Git}
+\hypersetup{
+    %bookmarks=true, % show bookmarks bar?
+    unicode=false, % non-Latin characters in Acrobat’s bookmarks
+    pdftoolbar=true, % show Acrobat’s toolbar?
+    pdfmenubar=true, % show Acrobat’s menu?
+    pdffitwindow=false, % window fit to page when opened
+    pdfstartview={FitH}, % fits the width of the page to the window
+    pdftitle={Git Tuto}, % title
+    pdfauthor={LAFON Sylvain pour Manzalab}, % author
+    pdfsubject={Tutoriel sur git}, % subject of the document
+    pdfcreator={Latex}, % creator of the document
+    pdfproducer={Texmaker}, % producer of the document
+    pdfkeywords={git} {tuto}, % list of keywords
+    pdfnewwindow=true, % links in new window
+    colorlinks=true, % false: boxed links; true: colored links
+    %hidelinks,
+    urlcolor=couleur_liens, % color of external links
+    linkcolor=black, % color of internal links
+    citecolor=green, % color of links to bibliography
+    filecolor=magenta, % color of file links
+}
+
+\begin{document}
+	\maketitle
+	\include{preface}
+	\include{versions}
+	\tableofcontents
+	\include{history}
+	\include{basics}
+	\include{server}
+	\include{misc}
+\end{document}
